@@ -6,7 +6,7 @@ PurEst is divided into three main modules:
 
 1. *Creation of reference data from a cohort*: in this first module, reference linear regressions are calculated based on DNA methylation beta values and tumor purity estimates of a cohort. Each regression represents a sample population as shown in the figure below. Scripts used in this module: ref_regression_calculator.r (main), new_function_correctBetas.r.
 
-<img src="./images/module1.png" width="400">
+<img src="./images/module1.png" width="350" class="center>
 
 2. *Estimation of tumor purities for individual samples*: in this module, CpGs are filtered based on beta variance and then each CpG is processed individually per sample as shown in the figure below. Scripts used in this module: purity_estimator.r (main), predicting_purity.r, purity_coverage.r.
 
@@ -22,10 +22,10 @@ All scripts must be in the same folder. They should be called from the terminal 
 
 * ref_regression_calculator.r
 ```bash
-Rscript path_to_scripts_folder/ref_regression_calculator.r -c [NUM_OF_CORES] -b [INPUT_BETAS.RData] -p [INPUT_PURITIES.RData] -o [OUTPUT_PATH] -n [OUTPUT_NAME] -v [VARIANCE_THRESHOLD]
+Rscript path_to_scripts_folder/ref_regression_calculator.r -c [NUM_OF_CORES] -b [INPUT_BETAS.rds] -p [INPUT_PURITIES.rds] -o [OUTPUT_PATH] -n [OUTPUT_NAME] -v [VARIANCE_THRESHOLD]
 ```
-INPUT_BETAS.RData: beta values per sample should be previously saved in .RData format. The file should contain a matrix with Illumina CpG identifiers as row names and samples as column names.  
-INPUT_PURITIES.RData: a named vector with same sample names.
+INPUT_BETAS.RData: beta values per sample should be previously saved in .rds format. The file should contain a matrix with Illumina CpG identifiers as row names and samples as column names.  
+INPUT_PURITIES.RData: a named vector with same sample names, also saved in .rds format.
 
 * purity_estimator.r
 ```bash
