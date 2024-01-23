@@ -4,15 +4,15 @@ Method for calculating tumor purity and adjusting Illumina 450/850K DNA methylat
 ## Framework
 PurEst is divided into three main modules:
 
-1. *Creation of reference data from a cohort*: in this first module, reference linear regressions are calculated based on DNA methylation beta values and tumor purity estimates of a cohort. Each regression represents a sample population as shown in the figure below. Scripts used in this module: ref_regression_calculator.r, new_function_correctBetas.r.
+1. *Creation of reference data from a cohort*: in this first module, reference linear regressions are calculated based on DNA methylation beta values and tumor purity estimates of a cohort. Each regression represents a sample population as shown in the figure below. Scripts used in this module: ref_regression_calculator.r (main), new_function_correctBetas.r.
 
 <img src="./images/module1.png" width="400">
 
-2. *Estimation of tumor purities for individual samples*: in this module, CpGs are filtered based on beta variance and then each CpG is processed individually per sample as shown in the figure below. Scripts used in this module: purity_estimator.r, predicting_purity.r, purity_coverage.r.
+2. *Estimation of tumor purities for individual samples*: in this module, CpGs are filtered based on beta variance and then each CpG is processed individually per sample as shown in the figure below. Scripts used in this module: purity_estimator.r (main), predicting_purity.r, purity_coverage.r.
 
 ![Module 2](./images/module2.png "PurEst Module 2")
 
-3. *Adjustment of beta values per CpG per sample*: in this final module, beta values are adjusted for tumor cells and inferred for normal cells using the reference regressions and the estimated purities. This can be carried out after refitting the regressions to include the new data points with estimated purities or using the original reference regressions. Scripts used in this module: final_beta_correction.r, new_function_correctBetas.r.
+3. *Adjustment of beta values per CpG per sample*: in this final module, beta values are adjusted for tumor cells and inferred for normal cells using the reference regressions and the estimated purities. This can be carried out after refitting the regressions to include the new data points with estimated purities or using the original reference regressions. Scripts used in this module: final_beta_correction.r (main), new_function_correctBetas.r.
 
 ![Module 3](./images/module3.png "PurEst Module 3")
 
