@@ -26,8 +26,8 @@ All scripts must be in the same folder. They should be called from the terminal 
 ```bash
 Rscript path_to_scripts_folder/ref_regression_calculator.r -c [NUM_OF_CORES] -b [INPUT_BETAS.rds] -p [INPUT_PURITIES.rds] -o [OUTPUT_PATH] -n [OUTPUT_NAME] -v [VARIANCE_THRESHOLD]
 ```
-INPUT_BETAS.RData: beta values per sample should be previously saved in .rds format. The file should contain a matrix with Illumina CpG identifiers as row names and samples as column names.  
-INPUT_PURITIES.RData: a named vector with same sample names, also saved in .rds format.
+INPUT_BETAS.rds: beta values per sample should be previously saved in .rds format. The file should contain a matrix with Illumina CpG identifiers as row names and samples as column names.  
+INPUT_PURITIES.rds: a named vector with same sample names, also saved in .rds format.
 
 * purity_estimator.r
 ```bash
