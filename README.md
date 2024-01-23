@@ -6,7 +6,7 @@ PurEst is divided into three main modules:
 
 1. *Creation of reference data from a cohort*: in this first module, reference linear regressions are calculated based on DNA methylation beta values and tumor purity estimates of a cohort. Each regression represents a sample population as shown in the figure below. Scripts used in this module: ref_regression_calculator.r, new_function_correctBetas.r.
 
-![Module 1](./images/module1.png "PurEst Module 1" | width=100)
+![Module 1](./images/module1.png "PurEst Module 1" width=100)
 
 2. *Estimation of tumor purities for individual samples*: in this module, CpGs are filtered based on beta variance and then each CpG is processed individually per sample as shown in the figure below. Scripts used in this module: purity_estimator.r, predicting_purity.r, purity_coverage.r.
 
