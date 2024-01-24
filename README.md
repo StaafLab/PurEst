@@ -24,14 +24,14 @@ All scripts must be in the same folder. They should be called from the terminal 
 
 * ref_regression_calculator.r
 ```bash
-Rscript path_to_scripts_folder/ref_regression_calculator.r -c [NUM_OF_CORES] -b [INPUT_BETAS.rds] -p [INPUT_PURITIES.rds] -o [OUTPUT_PATH] -n [OUTPUT_NAME] -v [VARIANCE_THRESHOLD]
+Rscript path_to_scripts_folder/ref_regression_calculator.r -c [NUM_OF_CORES] -b [INPUT_BETAS.rds] -p [INPUT_PURITIES.rds] -o [OUTPUT_PATH] -n [OUTPUT_NAME]
 ```
 INPUT_BETAS.rds: beta values per sample should be previously saved in .rds format. The file should contain a matrix with Illumina CpG identifiers as row names and samples as column names.  
 INPUT_PURITIES.rds: a named vector with same sample names, also saved in .rds format.
 
 * purity_estimator.r
 ```bash
-Rscript path_to_scripts_folder/purity_estimator.r -c [NUM_OF_CORES] -a [ALPHA_VALUE] -s [SLOPE_THRESHOLD] -p [PERCENTAGE_TO_INTERVAL] -d [REGRESSIONS_DIRECTORY] -b [BETAS_TO_ANALYSE] -o [OUTPUT_NAME] -l [OUTPUT_LOCATION]
+Rscript path_to_scripts_folder/purity_estimator.r -c [NUM_OF_CORES] -a [ALPHA_VALUE] -s [SLOPE_THRESHOLD]  -v [VARIANCE_THRESHOLD] -p [PERCENTAGE_TO_INTERVAL] -d [REGRESSIONS_DIRECTORY] -b [BETAS_TO_ANALYSE] -o [OUTPUT_NAME]
 ```
 
 * final_beta_correction.r
