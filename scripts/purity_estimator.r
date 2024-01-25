@@ -336,7 +336,7 @@ saveRDS(list_of_predicted_intervals, file=paste(arguments$output_location, argum
 # ==========================
 
 # Create a vector with the column names of the output dataframe
-cols <- c("#sample", "num_of_est", "1-purity_estimate", "low_bound", "top_bound")
+cols <- c("#sample", "num_of_est", "Estimate_1-purity", "low_bound", "top_bound")
 
 # Creating a dataframe with the columns below
 output_tsv <- data.frame(matrix(nrow=0, ncol=length(cols)))
