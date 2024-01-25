@@ -373,6 +373,8 @@ reg_list <- list(
 # CREATING OUTPUT FILES
 # =====================
 
+cat("\nGenerating output files...\n\n")
+
 #Defining a function to store the elements of the result list to rds files
 df_to_RObj <- function(df, filename) {
   saveRDS(df, file=filename)
@@ -624,9 +626,9 @@ rownames(corrected_microenvironment) <- rownames(to_correct_betas)
 cat("\nGenerating output files...\n\n")
 
 # Generating RObject files
-saveRDS(corrected_tumor, file=paste(arguments$output, arguments$output_name, "_betas.tumor.samples_to_correct.RData", sep=""))
-saveRDS(corrected_microenvironment, file=paste(arguments$output, arguments$output_name, "_betas.microenvironment.samples_to_correct.RData", sep=""))
-saveRDS(to_correct_betas, file=paste(arguments$output, arguments$output_name, "_betas.original.samples_to_correct.RData", sep=""))
+saveRDS(corrected_tumor, file=paste(arguments$output, arguments$output_name, "_betas.tumor.samples_to_correct.rds", sep=""))
+saveRDS(corrected_microenvironment, file=paste(arguments$output, arguments$output_name, "_betas.microenvironment.samples_to_correct.rds", sep=""))
+saveRDS(to_correct_betas, file=paste(arguments$output, arguments$output_name, "_betas.original.samples_to_correct.rds", sep=""))
 
 
 # Generating tsv files
