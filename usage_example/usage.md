@@ -1,6 +1,6 @@
 **USAGE EXAMPLE**
 
-This file explains the usage of the complete PurEst beta correction pipeline for samples without known purity values. The example dataset used consists of the 5000 most variable CpGs from the TCGA-BRCA data set, which was splitted into a subset containing 80% of the samples to generate the reference regressions, and the remaining 20% to estimate sample purity values and to correct betas.
+This file shows the usage of the complete beta correction pipeline for samples without known purity values. The example dataset used consists of the 5000 most variable CpGs from the TCGA-BRCA data set, which was splitted into a subset containing 80% of the samples to generate the reference regressions, and the remaining 20% to estimate sample purity values and to correct betas.
 
 * IMPORTANT: This example data set is not intended to be used to evaluate the tool's performace. Due to the low number of CpGs included aiming to speed up the process the performance may not be optimal.
 
@@ -33,5 +33,5 @@ Rscript ../../../scripts/final_beta_correction.r -c 6 -F FALSE -o ./ -n example_
 #Correcting betas without refitting the reference regressions
 cd ../not_refitting;
 
-Rscript ../../../scripts/final_beta_correction.r -c 6 -F FALSE -o ./ -n example_refitting -r FALSE -R ../../generating_regressions -b ../../data/data_to_correct/betas_toCorrect.rds -p ../../estimating_purities/example_estimated_purity.tsv
+Rscript ../../../scripts/final_beta_correction.r -c 6 -F FALSE -o ./ -n example_not_refitting -r FALSE -R ../../generating_regressions -b ../../data/data_to_correct/betas_toCorrect.rds -p ../../estimating_purities/example_estimated_purity.tsv;
 ``````

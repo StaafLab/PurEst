@@ -1,4 +1,4 @@
-#sample	num_of_est	1-purity_estimate	low_bound	top_bound
+#sample	num_of_est	Estimate_1-purity	low_bound	top_bound
 TCGA-3C-AAAU-01A	1	0.141	0.128	0.155
 TCGA-3C-AALI-01A	1	0.269	0.245	0.291
 TCGA-3C-AALJ-01A	1	0.335	0.303	0.36
