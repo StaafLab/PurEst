@@ -292,7 +292,7 @@ out_list <- foreach(s = samples, .packages = "Kendall", .options.snow = opts) %d
                                               intercepts=my_intercepts[cpg, ],
                                               RSE=my_RSE[cpg, ],
                                               degrees_of_freedom=my_df[cpg, ],
-                                              100*(1-slope_threshold=arguments$min_slope),
+                                              arguments$min_slope,
                                               alpha=arguments$alpha)
     
     }
@@ -303,7 +303,7 @@ out_list <- foreach(s = samples, .packages = "Kendall", .options.snow = opts) %d
   list(name = s, 
        value = purity_value_per_sample(
                       pred_purity_confidence=interval_mat,
-                      interval_threshold=arguments$percentage_to_interval),
+                      interval_threshold=100*(1-arguments$percentage_to_interval)),
         cpgs = rownames(na.omit(interval_mat))
        )
 }
