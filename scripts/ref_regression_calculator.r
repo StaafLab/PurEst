@@ -12,6 +12,7 @@
 #   *OPTPARSE. Parsing command line arguments
 #   *DOPARALLEL. Parallelizing execution
 #   *PARALLEL. Parallelizing script
+#   *FLEXMIX. Flexible mixture modelling used in the adjustBeta() function.
 #
 ## - USER DEFINED FUNCTIONS:
 #   
