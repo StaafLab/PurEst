@@ -15,7 +15,7 @@ predicting_purity <- function(beta,slopes,intercepts,RSE,degrees_of_freedom,slop
 
     # CHECK IF ARGUMENTS ARE EMPTY
     if (any(sapply(list(beta, slopes, intercepts, RSE, degrees_of_freedom, slope_threshold, alpha), is.null))) {
-        stop("One or more input arguments are empty.")
+        stop("Error in predicting_purity(). One or more input arguments are empty.")
     }
 
     #Identifying the regressions whose residual standard error is over the threshold
