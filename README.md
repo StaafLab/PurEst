@@ -46,5 +46,5 @@ RScript path_to_scripts_folder/final_beta_correction.r -h
 
 ## Reference data
 
-Beta values, beta variance, reference regression information, and purity estimates for TCGA BRCA (n=630 samples), TCGA LUAD (n=418), and TCGA LUSC (n=333) are available in Zenodo through [this DOI](https://doi.org/10.5281/zenodo.10549397).
+Beta values, beta variance, reference regression information, and purity estimates for TCGA BRCA (n=630 samples), TCGA LUAD (n=418), and TCGA LUSC (n=333) are available in FigShare through [this DOI](https://doi.org/10.6084/m9.figshare.25074098).
 
