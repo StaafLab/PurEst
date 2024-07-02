@@ -13,7 +13,9 @@
 #
 #   *OPTPARSE. Parsing command line arguments
 #   *DOPARALLEL. Parallelizing execution
-#   *PARALLEL. Parallelizing script
+#   *DOSNOW Parallelizing execution
+#   *KENDALL. Progress bar for parallelized for loops
+#   *PBAPPLY. Progress bar for parallelized apply functions
 #
 ## - USER DEFINED FUNCTIONS:
 #   
@@ -147,10 +149,20 @@ if(!requireNamespace("doParallel", quietly = TRUE)) {
 
 suppressPackageStartupMessages(library(doParallel))
 
-if(!requireNamespace("parallel", quietly = TRUE)) {
-  install.packages("parallel") }
+if(!requireNamespace("doSNOW", quietly = TRUE)) {
+  install.packages("doSNOW") }
 
-suppressPackageStartupMessages(library(parallel))
+suppressPackageStartupMessages(library(doSNOW))
+
+if(!requireNamespace("Kendall", quietly = TRUE)) {
+  install.packages("Kendall", quietly = TRUE) }
+
+suppressPackageStartupMessages(library(Kendall))
+
+if(!requireNamespace("pbapply", quietly = TRUE)) {
+  install.packages("pbapply", quietly = TRUE) }
+
+suppressPackageStartupMessages(library(pbapply))
 
 if(!requireNamespace("optparse", quietly = TRUE)) {
   install.packages("optparse") }
@@ -220,6 +232,7 @@ cat("\nUsing", arguments$cores,"cores\n\n")
 #Creating the cluster to run the process in parallel
 cl <- makeCluster(arguments$cores)  
 registerDoParallel(cl)  
+registerDoSNOW(cl)  
 
 
 
@@ -313,7 +326,7 @@ cohort_betas <- cohort_betas[rownames(to_correct_betas),]
 # ============
 # MERGING DATA
 # ============
-
+suppressPackageStartupMessages(library(optparse))
 # Creating a single purities vector
 purities <- c(cohort_purities, predicted_purities_vec)
 
@@ -340,13 +353,19 @@ betaRun <- cbind(seed=1:nrow(betas),betas)
 #Storing sample names
 betaNames <- colnames(betas)
 
+# Initializing progress bar and specifying options
+pbo <- pboptions(type = "txt", char="=", txt.width=80)
+
+
 #Running the analysis in parallel
-res <- parRapply(cl = cl, #ClusterS to run the process
-                 betaRun, #Beta values+the added seed
-                 adjustBeta, #Function to correct betas
-                 purity=purities, #Purity values
-                 snames=betaNames, #Sample names
-                 seed=TRUE) #The seed has been added in the data
+res <- pbapply(cl = cl, #ClusterS to run the process
+               MARGIN = 1, #Apply the function to the rows
+               FUN = adjustBeta, #Function to correct betas
+               purity=purities, #Purity values
+               snames=betaNames, #Sample names
+               seed=TRUE, #The seed has been added in the data
+               betaRun #Beta values+the added seed
+              )
 
 
 # ====================
@@ -366,14 +385,14 @@ reg_list <- list(
   reg.slopes = do.call("rbind",lapply(res,function(x) x$res.slopes)), #Slopes of the populations
   reg.intercepts = do.call("rbind",lapply(res,function(x) x$res.int)), #Intercepts of the populations
   reg.RSE = do.call("rbind",lapply(res,function(x) x$res.rse)), #Residual standard error
-  reg.df = do.call("rbind",lapply(res,function(x) x$res.df)) #Degrees of freedom of the reversed regressions
+  reg.df = do.call("rbind",lapply(res,function(x) x$res.df)) #Degrees of freedom of the regressions
 )
 
 # =====================
 # CREATING OUTPUT FILES
 # =====================
 
-cat("\nGenerating output files...\n\n")
+cat("\n\nGenerating output files...\n\n")
 
 #Defining a function to store the elements of the result list to rds files
 df_to_RObj <- function(df, filename) {
@@ -468,6 +487,7 @@ if (arguments$only_certain_CpGs) {
 
 }
 
+# Checking if the CpGs are included in the reference regressions
 if (sum(!(rownames(to_correct_betas) %in% rownames(my_slopes))) != 0) {
 
     # Printing warning message
@@ -481,131 +501,141 @@ if (sum(!(rownames(to_correct_betas) %in% rownames(my_slopes))) != 0) {
 my_slopes <- my_slopes[rownames(my_slopes) %in% rownames(to_correct_betas),]
 my_intercepts <- my_intercepts[rownames(my_intercepts) %in% rownames(to_correct_betas),]
 
-
-# ==============================================
-# CORRECTING BETAS BASED ON REFERNCE REGRESSIONS
-# ==============================================
+# ===============================================
+# CORRECTING BETAS BASED ON REFERENCE REGRESSIONS
+# ===============================================
 
 cat("\nCorrecting betas without refitting reference regressions...\n\n")
 
 #Generating function to identify the refernce regression to which each CpG of each sample belongs
-identify_regression <- function(beta, estimated_1mPurity, vec_slopes, vec_intercepts) {
+#All the samples are corrected based on the precomputed regression parameters for each CpG
+
+identify_regression <- function(vec_betas, vec_estimated_1mPurity, vec_slopes, vec_intercepts) {
+
+    # Checking if the arguments (vectors and simple numeric arguments) are numeric
+    if (!is.numeric(vec_betas) | !is.numeric(vec_estimated_1mPurity) | !is.numeric(vec_slopes) | !is.numeric(vec_intercepts)) {
+        stop("Beta, estimated 1mPurity, slopes and intercepts must be numeric to identify the regression.")
+    }
+
+    # Initilaizing dataframe to store the distances of each sample's CpG to each population
+    distances_df <- data.frame(
+      Beta = vec_betas,
+      Purity = vec_estimated_1mPurity,
+      Distance_1 = rep(NA, length(vec_betas)),
+      Distance_2 = rep(NA, length(vec_betas)),
+      Distance_3 = rep(NA, length(vec_betas))
+    )
 
 
-    # Generating a vector of distances
-    vec_of_dis <- unname(sapply(c(1:length(vec_slopes)), 
-                         FUN = function(pop) {
+    # Filling the matrix using an apply function
+    distances_matrix <- t(apply(distances_df, 1, function(row) {
 
-                                    #Ignoring NA values that appear when less than 3 populations are detected
-                                    #in the refernce rrgressions
-                                    if (!is.na(vec_slopes[pop])) {
-                                        beta - (vec_slopes[pop] * estimated_1mPurity + vec_intercepts[pop])
+        # Calculating the distance of the CpG to each population
+        distance_1 <-  if (!is.na(vec_slopes[1])) {row["Beta"] - (vec_slopes[1] * row["Purity"]  + vec_intercepts[1])} else {NA}
+        distance_2 <-  if (!is.na(vec_slopes[1])) {row["Beta"] - (vec_slopes[2] * row["Purity"]  + vec_intercepts[2])} else {NA}
+        distance_3 <-  if (!is.na(vec_slopes[1])) {row["Beta"] - (vec_slopes[3] * row["Purity"]  + vec_intercepts[3])} else {NA}
 
-                                    } else {
-                                        NA
-
-                                    }
-                                }
-                            ))
+        return(c(Distance_1 = distance_1, Distance_2 = distance_2, Distance_3 = distance_3))
+    }))
 
 
     #Determining the population (vector index) with the lowest absolute distance. If the distances are equal the first
     #population with be chosen by default
-    pop_identified <- which.min(abs(vec_of_dis))
+    pop_identified <- apply(distances_matrix, 1, function(row) which.min(abs(row)))
 
-    #Generating and returning output named vector
-    return(
-        c("Slope"=vec_slopes[pop_identified],
-          "Intercept"=vec_intercepts[pop_identified],
-          "Distance"=vec_of_dis[pop_identified])
-        )
+    #Generating and returning output dataframe with the parameters of the identified regressions
+    output_df <- data.frame(
+      Sample = names(vec_estimated_1mPurity), #Adding sample names
+      Slope = vec_slopes[pop_identified],
+      Intercept = vec_intercepts[pop_identified],
+      Distance = distances_matrix[cbind(1:nrow(distances_df), pop_identified)]
+    )
+
+    return(output_df)
+
     }
 
 
 #Generate function to correct betas based on the identified regression. The parametres specified must be 
 #from the beta VS 1-P regressions.
-correcting_betas <- function(slope, intercept, distance, to_correct) {
+correcting_betas <- function(slopes_vec, intercepts_vec, distances_vec, to_correct) {
 
+    # Checking if slopes and and intercepts are numeric
+    if (!is.numeric(slopes_vec) | !is.numeric(intercepts_vec)) {
+        stop("Slope and intercept must be numeric to correct betas.")
+    }
 
     if (to_correct=="Tumor") {
         #The tumor beta value will be obtained using the intercept and the calculated distance.
-        #The maximum possible value will allways be kept below or equal to 1
-        tum_beta <- if(intercept + distance <= 1 & intercept + distance >= 0) {
-                        intercept + distance
-                    } else if (intercept + distance > 1) {
-                        1
-                    } else {
-                      0
-                    }
+        tum_betas <- intercepts_vec + distances_vec
 
-        return(tum_beta)
+        #The maximum possible value will allways be kept below or equal to 1 and minimum to 0
+        tum_betas <- sapply(tum_betas, function(x) if(x > 1) {1} else {x})  # FIND BETTER WAY!!!
+        tum_betas <- sapply(tum_betas, function(x) if(x < 0) {0} else {x})
+                    
+        return(tum_betas)
 
 
     } else if (to_correct=="Microenvironment") {
         #The microenvironment beta value will be obtained using the intercept and slope when 1-P=1 and the calculated distance.
         #The minimum possible value will allways be kept below or equal to 1
-        env_beta <- if (intercept + slope + distance >= 0 & intercept + slope + distance <= 1) {
-                        intercept + slope + distance
-                    } else if (intercept + slope + distance < 0) {
-                        0
-                    } else {
-                      1
-                    }
+        env_betas <- intercepts_vec + slopes_vec + distances_vec
+
+        #The maximum possible value will allways be kept below or equal to 1 and minimum to 0
+        env_betas <- sapply(env_betas, function(x) if(x > 1) {1} else {x})
+        env_betas <- sapply(env_betas, function(x) if(x > 1) {1} else {x})
+
         
-        return(env_beta)
+        return(env_betas)
 
     }
 }
 
-
- # Correcting betas through a parallelized for loop
- output <- foreach(cpg = rownames(to_correct_betas)) %dopar% {
-
-  list(
-
-    corrected_tumor <- sapply(colnames(to_correct_betas), 
-
-        function(sample) {
-
-        identified_reg <- identify_regression(
-            beta=to_correct_betas[cpg, sample],
-            estimated_1mPurity=predicted_1mPurities_vec[sample],
-            vec_slopes=my_slopes[cpg,],
-            vec_intercepts=my_intercepts[cpg,]
-            )
+# Configure progress bar
+p_bar <- txtProgressBar(min=0, 
+                        max=nrow(to_correct_betas), 
+                        style=3,
+                        width=80)
 
 
-        corrected_tum <- correcting_betas(
-            slope=identified_reg["Slope"],
-            intercept=identified_reg["Intercept"],
-            distance=identified_reg["Distance"],
-            to_correct="Tumor"
-            )
-        }
-    ),
-
-    corrected_microenvironment <- sapply(colnames(to_correct_betas), 
-
-        function(sample) {
-
-        identified_reg <- identify_regression(
-            beta=to_correct_betas[cpg, sample],
-            estimated_1mPurity=predicted_1mPurities_vec[sample],
-            vec_slopes=my_slopes[cpg,],
-            vec_intercepts=my_intercepts[cpg,]
-            )
+# Creating a function to follow the execution of the script
+progress <- function(n) setTxtProgressBar(p_bar, n)
+opts <- list(progress = progress)
 
 
-        corrected_env <- correcting_betas(
-            slope=identified_reg["Slope"],
-            intercept=identified_reg["Intercept"],
-            distance=identified_reg["Distance"],
-            to_correct="Microenvironment"
-            )
+# Correcting betas through a parallelized for loop
+output <- foreach(cpg = rownames(to_correct_betas), .packages = "Kendall", .options.snow = opts) %dopar% {
 
-        }
-      )
+   # ASSIGN REGRESSION TO THE DIFFERENT SAMPLES FOR EACH CPG
+
+    identified_regressions <- identify_regression(
+      vec_betas = to_correct_betas[cpg,],
+      vec_estimated_1mPurity = predicted_1mPurities_vec,
+      vec_slopes = my_slopes[cpg,],
+      vec_intercepts = my_intercepts[cpg,]
     )
+
+
+    # CORRECTING BETAS BASED ON THE IDENTIFIED REGRESSIONS
+
+    list(
+
+      "Tumour" =  correcting_betas(
+        slopes_vec = identified_regressions$Slope,
+        intercepts_vec = identified_regressions$Intercept,
+        distances_vec = identified_regressions$Distance,
+        to_correct = "Tumor"
+      ),
+      "Microenvironment" = correcting_betas(
+        slopes_vec = identified_regressions$Slope,
+        intercepts_vec = identified_regressions$Intercept,
+        distances_vec = identified_regressions$Distance,
+        to_correct = "Microenvironment"
+      )
+
+    )
+
+
  }
 
 #Converting output list into dataframe of corrected tumor betas
@@ -623,7 +653,7 @@ rownames(corrected_microenvironment) <- rownames(to_correct_betas)
 # =======================
 
 
-cat("\nGenerating output files...\n\n")
+cat("\n\nGenerating output files...\n\n")
 
 # Generating RObject files
 saveRDS(corrected_tumor, file=paste(arguments$output, arguments$output_name, "_betas.tumor.samples_to_correct.rds", sep=""))
