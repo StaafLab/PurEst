@@ -1,0 +1,163 @@
+# PurEst
+
+PurEst <- function(
+
+  reference_regressions,
+  beta_values,
+  alpha = 0.7,
+  slope_threshold = 0.25,
+  variance_threshold = 0.05,
+  proportion_to_interval = 0.96,
+  cores = 1
+
+) {
+
+  #
+  # INITIALIZING  VARIABLES
+  #
+
+  list_of_predicted_intervals <- list() #Create a list to append all the predicted purity intervals
+  list_of_used_cpgs <- list() #Create a list to append the used CpGs for each prediction
+  output_list <- list() #List to append the final output
+
+
+  #
+  # FILTERING REFERENCE REGRESSIONS BASED ON VARIANCE
+  #
+
+  #Generate a vector with the CpGs to filter
+  cpgs_to_keep <- names(my_CpG_variance[reference_regressions$my_CpG_variance >= variance_threshold])
+
+  #Filtering regression objects
+  reference_regressions$my_slopes <- my_slopes[cpgs_to_keep,]
+  reference_regressions$my_intercepts <- my_intercepts[cpgs_to_keep,]
+  reference_regressions$my_RSE <- my_RSE[cpgs_to_keep,]
+  my_df <- beta_values[cpgs_to_keep,]
+
+
+  #
+  # CONFIGURING PARALLELIZATION
+  #
+
+  # Printing the number of cores to be used
+  cat("\nUsing", cores, "core(s)\n")
+
+  # Creating clusters to run the script in  parallel
+  cl <- makeCluster(cores)
+
+  #Registering the clusters
+  registerDoSNOW(cl)
+
+
+  #
+  # RUNNING THE ANALYSIS WITH A PROGRESS BAR
+  #
+
+  # Printing command line message
+  cat("\nRunning the analysis...\n\n")
+
+  # Getting the names of the samples to analyse
+  samples <- colnames(beta_values)
+
+  # Defining the progress bar
+  p_bar <- txtProgressBar(min = 0,
+                          max = length(samples),
+                          style = 3)
+
+  # Creating a function to follow the execution of the script
+  progress <- function(n) setTxtProgressBar(p_bar, n)
+  opts <- list(progress = progress)
+
+  # Running the sourced functions in parallel for each sample. The execution level will be followed through a progress bar
+  out_list <- foreach(s = samples, .packages = "Kendall", .options.snow = opts) %dopar% {
+
+    # Defining an empty matrix with the cpg ids as rownames to add the all the 1-Purity predicted intervals for all
+    # the CpGs of a sample
+    interval_mat <- matrix(ncol=2, nrow=length(rownames(beta_values)))
+    rownames(interval_mat) <- rownames(beta_values)
+
+
+    # Predicting all the 1-Purity intervals for each CpG of each sample and append them to the empty interval_mat
+    for (cpg in rownames(beta_values)) {
+
+      # The following if statement will be used to take into account only cpgs included into the
+      # refernce regression dataset
+      if (cpg %in% rownames(my_slopes)) {
+
+        interval_mat[cpg,] <- predicting_purity(beta=beta_values[cpg, s],
+                                                slopes=my_slopes[cpg, ],
+                                                intercepts=my_intercepts[cpg, ],
+                                                RSE=my_RSE[cpg, ],
+                                                degrees_of_freedom=my_df[cpg, ],
+                                                slope_threshold=slope_threshold,
+                                                alpha=alpha)
+
+      }
+    }
+
+    # Calculate the 1-Purity estimate and interval for the sample analysed.
+    # The results with be shown in list named with the sample id
+    list(name = s,
+         value = purity_value_per_sample(
+           pred_purity_confidence=interval_mat,
+           interval_threshold=100*(1-proportion_to_interval)),
+         cpgs = rownames(na.omit(interval_mat))
+    )
+  }
+
+  # Append the list defined for each sample to the list containing the predicted values for all the samples.
+  # The sample id is used to identify each element of the list
+  list_of_predicted_intervals <- setNames(lapply(out_list, function(x) x$value), sapply(out_list, function(x) x$name))
+  list_of_used_cpgs <- setNames(sapply(out_list, function(x) x$cpgs), sapply(out_list, function(x) x$name))
+
+
+  #
+  # GENERATING OUTPUT
+  #
+
+  # Create a vector with the column names of the output dataframe
+  cols <- c("#sample", "num_of_est", "estimate_1-purity", "low_bound", "top_bound")
+
+  # Creating a dataframe with the columns below
+  output_df <- data.frame(matrix(nrow=0, ncol=length(cols)))
+
+  # Appending the values of the list of predicted intervals
+  for (sample in names(list_of_predicted_intervals)) {
+
+    # A different row will be appended per each detected estimate per sample
+    for (num in length(list_of_predicted_intervals[[sample]][["1-Pur_estimates"]])) {
+
+      # Creating vector with the data to append
+      row <- c(sample,
+               length(list_of_predicted_intervals[[sample]][["1-Pur_estimates"]]), # This will indicate the number of estimates detected
+               list_of_predicted_intervals[[sample]][["1-Pur_estimates"]][num],
+               list_of_predicted_intervals[[sample]][["interval(s)"]][[num]][1],
+               list_of_predicted_intervals[[sample]][["interval(s)"]][[num]][2]
+      )
+
+      # Appending row to dataframe
+      output_df <- rbind(output_df, row)
+
+    }
+
+  }
+
+  #Setting column names
+  colnames(output_df) <- cols
+
+
+  # Adding values to output list
+  output_list$"Estimated_1-Purities" = output_df
+  output_list$"Used_CpGs" = list_of_used_cpgs
+
+  # Stop clusters used in parallelization
+  stopCluster(cl)
+
+  cat("\n=================\n")
+  cat ("PROCESS FINISHED")
+  cat("\n=================\n")
+
+  # Returning output list
+  return(output_list)
+
+}
