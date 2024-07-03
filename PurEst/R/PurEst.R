@@ -26,12 +26,12 @@ PurEst <- function(
   #
 
   #Generate a vector with the CpGs to filter
-  cpgs_to_keep <- names(my_CpG_variance[reference_regressions$my_CpG_variance >= variance_threshold])
+  cpgs_to_keep <- names(reference_regressions$cpg.variance[reference_regressions$cpg.variance >= variance_threshold])
 
   #Filtering regression objects
-  reference_regressions$my_slopes <- my_slopes[cpgs_to_keep,]
-  reference_regressions$my_intercepts <- my_intercepts[cpgs_to_keep,]
-  reference_regressions$my_RSE <- my_RSE[cpgs_to_keep,]
+  reference_regressions$reg.slopes <- reference_regressions$reg.slopes[cpgs_to_keep,]
+  reference_regressions$reg.intercepts <- reference_regressions$reg.intercepts[cpgs_to_keep,]
+  reference_regressions$reg.RSE <- reference_regressions$reg.RSE[cpgs_to_keep,]
   my_df <- beta_values[cpgs_to_keep,]
 
 
@@ -48,6 +48,8 @@ PurEst <- function(
   #Registering the clusters
   registerDoSNOW(cl)
 
+  invisible(clusterExport(cl, c("predicting_purity", "purity_coverage")))
+
 
   #
   # RUNNING THE ANALYSIS WITH A PROGRESS BAR
@@ -62,7 +64,8 @@ PurEst <- function(
   # Defining the progress bar
   p_bar <- txtProgressBar(min = 0,
                           max = length(samples),
-                          style = 3)
+                          style = 3,
+                          width = 80)
 
   # Creating a function to follow the execution of the script
   progress <- function(n) setTxtProgressBar(p_bar, n)
@@ -82,13 +85,13 @@ PurEst <- function(
 
       # The following if statement will be used to take into account only cpgs included into the
       # refernce regression dataset
-      if (cpg %in% rownames(my_slopes)) {
+      if (cpg %in% rownames(reference_regressions$reg.slopes)) {
 
         interval_mat[cpg,] <- predicting_purity(beta=beta_values[cpg, s],
-                                                slopes=my_slopes[cpg, ],
-                                                intercepts=my_intercepts[cpg, ],
-                                                RSE=my_RSE[cpg, ],
-                                                degrees_of_freedom=my_df[cpg, ],
+                                                slopes=reference_regressions$reg.slopes[cpg, ],
+                                                intercepts=reference_regressions$reg.intercepts[cpg, ],
+                                                RSE=reference_regressions$reg.RSE[cpg, ],
+                                                degrees_of_freedom=reference_regressions$reg.df[cpg, ],
                                                 slope_threshold=slope_threshold,
                                                 alpha=alpha)
 
@@ -98,9 +101,9 @@ PurEst <- function(
     # Calculate the 1-Purity estimate and interval for the sample analysed.
     # The results with be shown in list named with the sample id
     list(name = s,
-         value = purity_value_per_sample(
-           pred_purity_confidence=interval_mat,
-           interval_threshold=100*(1-proportion_to_interval)),
+         value = purity_coverage(
+         pred_purity_confidence=interval_mat,
+         interval_threshold=100*(1-proportion_to_interval)),
          cpgs = rownames(na.omit(interval_mat))
     )
   }
@@ -142,6 +145,10 @@ PurEst <- function(
 
   }
 
+  # Stop clusters used in parallelization
+  stopCluster(cl)
+
+
   #Setting column names
   colnames(output_df) <- cols
 
@@ -150,12 +157,10 @@ PurEst <- function(
   output_list$"Estimated_1-Purities" = output_df
   output_list$"Used_CpGs" = list_of_used_cpgs
 
-  # Stop clusters used in parallelization
-  stopCluster(cl)
 
-  cat("\n=================\n")
+  cat("\n\n=================\n")
   cat ("PROCESS FINISHED")
-  cat("\n=================\n")
+  cat("\n=================\n\n")
 
   # Returning output list
   return(output_list)

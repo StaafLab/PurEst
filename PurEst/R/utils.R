@@ -6,7 +6,7 @@
 # of each CpG
 #
 
-new_function_correct_betas <- function(
+adjustBeta <- function(
 
     methylation,
     purity,
@@ -197,7 +197,7 @@ predicting_purity <- function(
 
     beta,
     slopes,
-    intersepts,
+    intercepts,
     RSE,
     degrees_of_freedom,
     slope_threshold,
@@ -478,14 +478,14 @@ identify_regression <- function(
   ) {
 
     # Checking if the arguments (vectors and simple numeric arguments) are numeric
-    if (!is.numeric(vec_betas) | !is.numeric(vec_estimated_1mPurity) | !is.numeric(vec_slopes) | !is.numeric(vec_intercepts)) {
-      stop("Beta, estimated 1mPurity, slopes and intercepts must be numeric to identify the regression.")
+    if (!is.numeric(vec_betas) | !is.numeric(vec_slopes) | !is.numeric(vec_intercepts)) {
+      stop("Betas, slopes and intercepts must be numeric to identify the regression.")
     }
 
     # Initilaizing dataframe to store the distances of each sample's CpG to each population
     distances_df <- data.frame(
       Beta = vec_betas,
-      Purity = vec_estimated_1mPurity,
+      Purity = as.numeric(vec_estimated_1mPurity),
       Distance_1 = rep(NA, length(vec_betas)),
       Distance_2 = rep(NA, length(vec_betas)),
       Distance_3 = rep(NA, length(vec_betas))
@@ -528,16 +528,16 @@ identify_regression <- function(
 correcting_betas <- function(
 
     slopes_vec,
-    intrecepts_vec,
+    intercepts_vec,
     distances_vec,
     to_correct
 
   ) {
 
-    # Checking if slopes and and intercepts are numeric
-    if (!is.numeric(slopes_vec) | !is.numeric(intercepts_vec)) {
-      stop("Slope and intercept must be numeric to correct betas.")
-    }
+
+#    if (!is.numeric(slopes_vec) | !is.numeric(intercepts_vec)) {
+#      stop("Slope and intercept must be numeric to correct betas.")
+#    }
 
     if (to_correct=="Tumor") {
       #The tumor beta value will be obtained using the intercept and the calculated distance.

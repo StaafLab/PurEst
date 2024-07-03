@@ -21,12 +21,10 @@ reference_based_beta_correction <- function(
   # CONFIGURING PARALLELIZATION
   # ===========================
 
-  cat("\nUsing", arguments$cores,"core(s)\n\n")
+  cat("\nUsing", cores,"core(s)\n\n")
 
   #Creating the cluster to run the process in parallel
-  cl <- makeCluster(arguments$cores)
-  registerDoParallel(cl)
-  registerDoSNOW(cl)
+  cl <- makeCluster(cores)
 
 
   # =============================================
@@ -37,7 +35,7 @@ reference_based_beta_correction <- function(
 
     #Making sure that all cores have access to the flexmix package. Using invisible()
     #to avoid printing anything to the terminal
-
+    registerDoParallel(cl)
     invisible(clusterEvalQ(cl, {library("flexmix")}))
 
     # PROCESSING PREDICTED PURITIES
@@ -45,7 +43,7 @@ reference_based_beta_correction <- function(
     cat("\nPreprocessing the data...\n\n")
 
     # Getting predicted 1-purities from PurEst output
-    predicted_1mPurities <- purities_samples_to_correct$"Estimated_1-Purities"
+    predicted_1mPurities <- purities_samples_to_correct$`Estimated_1-Purities`
 
     # Removing samples with more than one estimates (if any)
     if (nrow(predicted_1mPurities[which(predicted_1mPurities[,2]!=1),])!=0) {
@@ -61,7 +59,7 @@ reference_based_beta_correction <- function(
     }
 
     # Transforming the predicted_purities dataframe into a vector
-    predicted_purities_vec <- 1 - predicted_1mPurities[,3] # Using purity, no 1-Purity
+    predicted_purities_vec <- 1 - as.numeric(predicted_1mPurities[,3]) # Using purity, no 1-Purity
     names(predicted_purities_vec) <- predicted_1mPurities[,1]
 
 
@@ -85,13 +83,13 @@ reference_based_beta_correction <- function(
       cat("\n",  sum(!(rownames(betas_to_correct) %in% rownames(reference_betas))), "CpG(s) is/are not included into the reference cohort, so it/they can not be corrected.\n\n")
 
       # Filtering not included CpGs
-      to_correct_betas <- to_correct_betas[rownames(to_correct_betas) %in% rownames(reference_betas),]
+      betas_to_correct <- t[rownames(betas_to_correct) %in% rownames(reference_betas),]
     }
 
     # Remove CpGs from the cohort dataset that are not included into the data to correct to speed up the process.
     reference_betas <- reference_betas[rownames(reference_betas) %in% rownames(betas_to_correct),]
 
-    #Sorting the cohort betas dataframe based on the rownames of to_correct_betas
+    #Sorting the cohort betas dataframe based on the rownames of betas_to_correct
     reference_betas <- reference_betas[rownames(betas_to_correct),]
 
 
@@ -139,6 +137,9 @@ reference_based_beta_correction <- function(
                    betaRun #Beta values+the added seed
     )
 
+    # Stop clusters used in parallelization
+    stopCluster(cl)
+
 
     # GENERATING RESULT LIST
 
@@ -166,8 +167,7 @@ reference_based_beta_correction <- function(
       result_list[[n]][,names(predicted_purities_vec)]
     })
 
-    # Stop clusters used in parallelization
-    stopCluster(cl)
+
 
     cat("\n=================\n")
     cat ("PROCESS FINISHED")
@@ -188,9 +188,16 @@ reference_based_beta_correction <- function(
 
   } else {
 
+    registerDoSNOW(cl)
+    clusterExport(cl, c("identify_regression", "correcting_betas"))
+
     # PROCESSING PREDICTED PURITIES
 
     cat("\nPreprocessing the data...\n\n")
+
+    # Getting predicted 1-purities from PurEst output
+    predicted_1mPurities <- purities_samples_to_correct$`Estimated_1-Purities`
+
 
     # Removing samples with more than one estimates (if any)
     if (nrow(predicted_1mPurities[which(predicted_1mPurities[,2]!=1),])!=0) {
@@ -211,6 +218,7 @@ reference_based_beta_correction <- function(
     names(predicted_1mPurities_vec) <- predicted_1mPurities[,1]
 
   }
+
 
   # Reformatting reference regression parametersç
   my_slopes <- reference_regressions$reg.slopes
@@ -239,7 +247,7 @@ reference_based_beta_correction <- function(
     cat("\n",  sum(!(rownames(betas_to_correct) %in% rownames(my_slopes))), "CpG(s) is/are not included into the refernce cohort, so it/they can not be corrected.\n\n")
 
     # Filtering not included CpGs
-    to_correct_betas <- to_correct_betas[rownames(betas_to_correct) %in% rownames(my_slopes),]
+    betas_to_correct <- betas_to_correct[rownames(betas_to_correct) %in% rownames(my_slopes),]
   }
 
   # Remove CpGs from the regressions that are not included into the data to correct to speed up the process.
@@ -251,9 +259,10 @@ reference_based_beta_correction <- function(
 
   cat("\nCorrecting betas without refitting reference regressions...\n\n")
 
+
   # Configure progress bar
   p_bar <- txtProgressBar(min=0,
-                          max=nrow(to_correct_betas),
+                          max=nrow(betas_to_correct),
                           style=3,
                           width=80)
 
@@ -268,35 +277,39 @@ reference_based_beta_correction <- function(
     # ASSIGN REGRESSION TO THE DIFFERENT SAMPLES FOR EACH CPG
 
     identified_regressions <- identify_regression(
-      vec_betas = betas_to_correct[cpg,],
+      vec_betas = as.numeric(betas_to_correct[cpg,]),
       vec_estimated_1mPurity = predicted_1mPurities_vec,
-      vec_slopes = my_slopes[cpg,],
-      vec_intercepts = my_intercepts[cpg,]
+      vec_slopes = as.numeric(my_slopes[cpg,]),
+      vec_intercepts = as.numeric(my_intercepts[cpg,])
     )
 
 
     # CORRECTING BETAS BASED ON THE IDENTIFIED REGRESSIONS
 
-    list(
+    return(
+      list(
 
-      "Tumour" =  correcting_betas(
-        slopes_vec = identified_regressions$Slope,
-        intercepts_vec = identified_regressions$Intercept,
-        distances_vec = identified_regressions$Distance,
-        to_correct = "Tumor"
-      ),
-      "Microenvironment" = correcting_betas(
-        slopes_vec = identified_regressions$Slope,
-        intercepts_vec = identified_regressions$Intercept,
-        distances_vec = identified_regressions$Distance,
-        to_correct = "Microenvironment"
+        "Tumour" =  correcting_betas(
+          slopes_vec = as.numeric(identified_regressions$Slope),
+          intercepts_vec = as.numeric(identified_regressions$Intercept),
+          distances_vec = as.numeric(identified_regressions$Distance),
+          to_correct = "Tumor"
+        ),
+        "Microenvironment" = correcting_betas(
+          slopes_vec = as.numeric(identified_regressions$Slope),
+          intercepts_vec = as.numeric(identified_regressions$Intercept),
+          distances_vec = as.numeric(identified_regressions$Distance),
+          to_correct = "Microenvironment"
+        )
       )
-
     )
+
+    # Stop clusters used in parallelization
+    stopCluster(cl)
 
     # PROCESSING OUTPUT
 
-    cat("\nGenerating output...\n\n")
+    cat("\n\nGenerating output...\n\n")
 
     #Converting output list into dataframe of corrected tumor betas
     corrected_tumor <- as.data.frame(do.call(rbind, lapply(output, function(item) item[[1]])))
@@ -308,12 +321,10 @@ reference_based_beta_correction <- function(
     colnames(corrected_microenvironment) <- colnames(betas_to_correct)
     rownames(corrected_microenvironment) <- rownames(betas_to_correct)
 
-    # Stop clusters used in parallelization
-    stopCluster(cl)
 
-    cat("\n=================\n")
+    cat("\n\n=================\n")
     cat ("PROCESS FINISHED")
-    cat("\n=================\n")
+    cat("\n=================\n\n")
 
     return(
       list(
