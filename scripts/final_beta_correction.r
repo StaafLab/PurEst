@@ -618,23 +618,24 @@ output <- foreach(cpg = rownames(to_correct_betas), .packages = "Kendall", .opti
 
     # CORRECTING BETAS BASED ON THE IDENTIFIED REGRESSIONS
 
-    list(
+    return(
+      list(
 
-      "Tumour" =  correcting_betas(
-        slopes_vec = identified_regressions$Slope,
-        intercepts_vec = identified_regressions$Intercept,
-        distances_vec = identified_regressions$Distance,
-        to_correct = "Tumor"
-      ),
-      "Microenvironment" = correcting_betas(
-        slopes_vec = identified_regressions$Slope,
-        intercepts_vec = identified_regressions$Intercept,
-        distances_vec = identified_regressions$Distance,
-        to_correct = "Microenvironment"
+        "Tumour" =  correcting_betas(
+          slopes_vec = identified_regressions$Slope,
+          intercepts_vec = identified_regressions$Intercept,
+          distances_vec = identified_regressions$Distance,
+          to_correct = "Tumor"
+        ),
+        "Microenvironment" = correcting_betas(
+          slopes_vec = identified_regressions$Slope,
+          intercepts_vec = identified_regressions$Intercept,
+          distances_vec = identified_regressions$Distance,
+          to_correct = "Microenvironment"
+        )
+
       )
-
     )
-
 
  }
 
