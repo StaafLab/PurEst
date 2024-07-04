@@ -1,5 +1,63 @@
-# reference_regression_generator
-
+#' reference_regression_generator
+#'
+#' @param beta_values A matrix with CpGs as rows and analysed samples (or an
+#' individual sample) as columns with the uncorrected beta values from the CpGs
+#' of the samples that are intended to be used to build the reference regressions.
+#' The values must be numeric, the rows must be names with the CpG ID, and the
+#' columns with the sample IDs. An example of the required format is available
+#' in the example_betas_reference matrix.
+#'
+#' @param tumour_purities Named vector containing the sample purity values of
+#' of the samples whose DNA methylation beta values are intended to be used to
+#' build the reference regressions. The vector must be named with the sample ID,
+#' which must match with the sample IDs from the matrix containing the beta
+#' values. An example of the required format is available in the
+#' example_purities_reference vector
+#'
+#' @param set_seed  Default = FALSE. A seed for the FlexMix package to detect
+#' the different CpG methylation patterns can be used by setting this argument
+#' to TRUE.
+#'
+#' @param seed_num Default = 2000. The seed to be used when set_seed = TRUE can
+#' be specified here.
+#'
+#' @param cores  Default = 1. Number of cores to be used to run the function in
+#' parallel.
+#'
+#' @param regression_details Default = FALSE. The user can set this argument to
+#' TRUE to obtain an extended version of the output reference list containing
+#' the original beta values, the corrected tumour and microenvironment betas
+#' after applying the Staaf & Aine beta correction for whole cohorts in the
+#' reference data, and the methylation pattern or population assigned to each
+#' sample used to buld the reference regressions per CpG.
+#'
+#' @returns A list with the parameters of the computed reference regressions. The
+#' list contains the variance of the betas of CpGs used to build the regressions
+#' (output$cpg.variance), the slopes, intercepts residual standard error and
+#' degrees of freedom of the regression calculated per CpG (output$reg.slopes,
+#' output$reg.intercepts, output$reg.RSE and output$df). If the extended output
+#' list is required it will also include the original uncorrected beta values
+#' (output$betas.original), the corrected tumour beta values (output$betas.tumour),
+#' the corrected microenvironment beta values (output$betas.microenvironment) and
+#' the methylation pattern or population assigned to each sample used to buld
+#' the reference regressions per CpG (output$cpg.populations).
+#'
+#' @export
+#'
+#' @examples
+#'
+#' # Using the default parameters
+#' reference_regression_generator(beta_values = example_betas_reference,
+#'                              tumour_purities = example_purities_reference)
+#'
+#' # Specifying new parameters
+#' reference_regression_generator(beta_values = example_betas_reference,
+#'                                tumour_purities = example_purities_reference,
+#'                                set_seed = TRUE,
+#'                                seed_num = 1,
+#'                                cores = 5,
+#'                                regressuion_details = TRUE)
+#'
 reference_regression_generator <- function(
 
   beta_values, # Matrix of beta values of CoGs of certain samples
