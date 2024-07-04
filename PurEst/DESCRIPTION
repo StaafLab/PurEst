@@ -10,3 +10,4 @@ License: The GNU General Public License
 Encoding: UTF-8
 LazyData: true
 Depends: doParallel,parallel,flexmix,doSNOW,foreach,Kendall,pbapply
+RoxygenNote: 7.3.2
