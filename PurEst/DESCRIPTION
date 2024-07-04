@@ -4,33 +4,14 @@ Title: Method for calculating tumor purity and adjusting Illumina 450/850K DNA m
 Version: 1.0.0
 Author: Iñaki Sasiain Casado
 Maintainer: Iñaki Sasiain Casado <inaki.sasiain_casado@med.lu.se>
-Description: This package allows for the adjustment of DNA methylation beta values
-based on sample-purity, to account for the effect of tumour composition in the 
-experimentally determined beta values. Additionally, it also allows for the estimation
-of sample purity from undajusted beta values using reference data.
-
+Description: This package allows for the adjustment of DNA methylation beta values based on sample-purity, to account for the effect of tumour composition in the experimentally determined beta values. Additionally, it also allows for the estimation of sample purity from unadjusted beta values using reference data.
     The PurEst package consists of four functions 
-    
-    -> beta_correction_for_cohorts() to correct betas from cohorts of samples with 
-    known betas and sample purities following the Staaf & Aine beta adjustment 
-    method (Staaf & Aine, PlosOne, 2022)
-
-    -> reference_regression_generator() to generate reference linar models from
-    reference betas and purities to be used as reference for the purity
-    estimation of samples with unkonwn purity values and the correction of the
-    beta values of those cases.
-    
-    -> PurEst() to predict sample purity based on the output of the previous 
-    function and beta values of the samples with unknown purities.
-    
-    -> reference_based_beta_correction() to correct beta values based on reference
-    data using two possible approaches; using the original reference regressions
-    or refitting them adding the betas to correct and the predicted sample purities
-    as new data points.
-
-
-License: The GNU General Public License
+    -> beta_correction_for_cohorts() to correct betas from cohorts of samples with known betas and sample purities following the Staaf & Aine beta adjustment method (Staaf & Aine, PlosOne, 2022)
+    -> reference_regression_generator() to generate reference linear models from reference betas and purities to be used as reference for the purity estimation of samples with unkonwn purity values and the correction of the beta values of those cases.
+    -> PurEst() to predict sample purity based on the output of the previous function and beta values of the samples with unknown purities.
+    -> reference_based_beta_correction() to correct beta values based on reference data using two possible approaches; using the original reference regressions or refitting them adding the betas to correct and the predicted sample purities as new data points.
+License: "GPL (>= 2)"
 Encoding: UTF-8
 LazyData: true
-Depends: doParallel,parallel,flexmix,doSNOW,foreach,Kendall,pbapply
+Depends: R (>= 3.5.0), doParallel, parallel, flexmix, doSNOW, foreach, Kendall, pbapply
 RoxygenNote: 7.3.2
