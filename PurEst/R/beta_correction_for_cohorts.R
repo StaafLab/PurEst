@@ -1,5 +1,10 @@
 #' beta_correction_for_cohorts
 #'
+#' This functions applies the original Staaf & Aine DNA methylation beta value
+#' correction strategy to adjust the effect of sample purities in cohorts with
+#' known sample purities and CpG beta values (Staaf & Aine, Plos One, 2022).
+#' This function allows mult-core parallelization.
+#'
 #' @param beta_values A matrix with CpGs as rows and analysed samples (or an
 #' individual sample) as columns with the uncorrected beta values from the CpGs
 #' of the samples that are intended to be corrected. The values must be numeric,

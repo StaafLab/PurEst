@@ -1,5 +1,10 @@
 #' reference_regression_generator
 #'
+#' This function generates the reference regressions' parameters and variance of
+#' the used reference CpGs required to be used in subsequent steps of the PurEst
+#' workflow based on the Staaf & Aine methylation beta value correction startegy.
+#' This function allows multi-core parallel execution.
+#'
 #' @param beta_values A matrix with CpGs as rows and analysed samples (or an
 #' individual sample) as columns with the uncorrected beta values from the CpGs
 #' of the samples that are intended to be used to build the reference regressions.

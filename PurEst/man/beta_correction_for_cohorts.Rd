@@ -42,7 +42,10 @@ List containing the original uncorrected beta values
 and the corrected microenvironment beta values (output$betas.microenvironment).
 }
 \description{
-beta_correction_for_cohorts
+This functions applies the original Staaf & Aine DNA methylation beta value
+correction strategy to adjust the effect of sample purities in cohorts with
+known sample purities and CpG beta values (Staaf & Aine, Plos One, 2022).
+This function allows mult-core parallelization.
 }
 \examples{
 
