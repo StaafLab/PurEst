@@ -1,5 +1,46 @@
-#beta_correction_for_cohorts
-
+#' beta_correction_for_cohorts
+#'
+#' @param beta_values A matrix with CpGs as rows and analysed samples (or an
+#' individual sample) as columns with the uncorrected beta values from the CpGs
+#' of the samples that are intended to be corrected. The values must be numeric,
+#' the rows must be names with the CpG ID, and the columns with the sample IDs.
+#' An example of the required format is available in the
+#' example_betas_reference matrix.
+#'
+#' @param tumour_purities Named vector containing the sample purity values of
+#' of the samples whose DNA methylation beta values are intended to be corrected.
+#' The vector must be named with the sample ID, which must match with the sample
+#' IDs from the matrix containing the beta values. An example of the required
+#' format is available in the example_purities_reference vector.
+#'
+#' @param set_seed Default = FALSE. A seed for the FlexMix package to detect
+#' the different CpG methylation patterns can be used by setting this argument
+#' to TRUE.
+#'
+#' @param seed_num Default = 2000. The seed to be used when set_seed = TRUE can
+#' be specified here.
+#'
+#' @param cores Default = 1. Number of cores to be used to run the function in
+#' parallel.
+#'
+#' @return List containing the original uncorrected beta values
+#' (output$betas.original), the corrected tumour beta values (output$betas.tumour)
+#' and the corrected microenvironment beta values (output$betas.microenvironment).
+#'
+#' @export
+#'
+#' @examples
+#'
+#' # Using the default parameters
+#' beta_correction_for_cohorts (beta_values = example_betas_reference,
+#'                              tumour_purities = example_purities_reference)
+#'
+#' # Using the default parameters
+#' beta_correction_for_cohorts (beta_values = example_betas_reference,
+#'                              tumour_purities = example_purities_reference,
+#'                              set_seed = TRUE,
+#'                              seed_num = 1,
+#'                              cores = 5)
 beta_correction_for_cohorts <- function(
 
   beta_values, # Matrix of beta values of CoGs of certain samples
@@ -71,7 +112,7 @@ beta_correction_for_cohorts <- function(
 
   result_list <- list(
       betas.original = do.call("rbind",lapply(res,function(x) x$y.orig)), #Original beta values
-      betas.tumor = do.call("rbind",lapply(res,function(x) x$y.tum)), #Corrected tumor beta values
+      betas.tumour = do.call("rbind",lapply(res,function(x) x$y.tum)), #Corrected tumor beta values
       betas.microenvironment = do.call("rbind",lapply(res,function(x) x$y.norm)) #Corrected microenvironment beta values
     )
 
