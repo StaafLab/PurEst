@@ -50,7 +50,7 @@ beta_correction_for_cohorts
 beta_correction_for_cohorts (beta_values = example_betas_reference,
                              tumour_purities = example_purities_reference)
 
-# Using the default parameters
+# Specifying new parameters
 beta_correction_for_cohorts (beta_values = example_betas_reference,
                              tumour_purities = example_purities_reference,
                              set_seed = TRUE,
