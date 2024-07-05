@@ -76,7 +76,6 @@ PurEst <- function(
   variance_threshold = 0.05,
   proportion_to_interval = 0.96,
   cores = 1
-
 ) {
 
   #

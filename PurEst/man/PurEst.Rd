@@ -52,7 +52,7 @@ parallel.}
 }
 \value{
 List containing a data frame with the predicted 1 - Purity values
-(output$`Estimated_1mPurities`).It contains the identified estimates (in very
+(output$`Estimated_1mPurities`). It contains the identified estimates (in very
 exceptional cases it could be different to 1) the estimated 1-Purity values
 and intervals predicted per each sample. If more than one estimates are
 obtained, one independent line per estimate will be created in the data frame.
@@ -74,10 +74,11 @@ PurEst(reference_regressions = output_from_reference_regression_generator,
 
 # Specifying new parameters
 PurEst(reference_regressions = output_from_reference_regression_generator,
-       beta_values = example_betas_to_correct
+       beta_values = example_betas_to_correct,
        alpha = 0.75,
        slope_threshold = 0.2,
        variance_threshold = 0.06,
        proportion_to_interval = 0.93,
        cores = 5)
+
 }
