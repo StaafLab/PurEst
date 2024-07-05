@@ -1,4 +1,4 @@
-#' PurEsr
+#' PurEst
 #'
 #' The PurEst() function estimates tumour sample purity based on DNA methylation
 #' beta values and reference linear models that reflect the correlation between
@@ -42,8 +42,8 @@
 #' @param cores Default = 1. Number of cores to be used to run the function in
 #' parallel.
 #'
-#' @return List containing a data frame with the predicted 1 - Purity values
-#' (output$`Estimated_1mPurities`).It contains the identified estimates (in very
+#' @returns List containing a data frame with the predicted 1 - Purity values
+#' (output$`Estimated_1mPurities`). It contains the identified estimates (in very
 #' exceptional cases it could be different to 1) the estimated 1-Purity values
 #' and intervals predicted per each sample. If more than one estimates are
 #' obtained, one independent line per estimate will be created in the data frame.
@@ -60,12 +60,13 @@
 #'
 #' # Specifying new parameters
 #' PurEst(reference_regressions = output_from_reference_regression_generator,
-#'        beta_values = example_betas_to_correct
+#'        beta_values = example_betas_to_correct,
 #'        alpha = 0.75,
 #'        slope_threshold = 0.2,
 #'        variance_threshold = 0.06,
 #'        proportion_to_interval = 0.93,
 #'        cores = 5)
+#'
 PurEst <- function(
 
   reference_regressions,

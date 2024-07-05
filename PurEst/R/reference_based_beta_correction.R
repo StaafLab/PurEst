@@ -80,7 +80,7 @@
 #'                                 purities_samples_to_correct = PurEst_output,
 #'                                 only_certain_CpGs = FALSE,
 #'                                 refitting = FALSE,
-#'                                 refernce_regressions = reference_regression_generator_output,
+#'                                 reference_regressions = reference_regression_generator_output,
 #'                                 cores = 5)
 #'
 #'# Using the non-refitting approach for certain CpGs

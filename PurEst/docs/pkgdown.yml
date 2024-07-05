@@ -1,0 +1,25 @@
+pandoc: 3.1.1
+pkgdown: 2.0.9
+
+template:
+  package: rbitemplate
+  bootstrap: 5
+
+home:
+  links:
+  - text: NIH EXPORTER
+    href: https://reporter.nih.gov/exporter
+
+reference:
+- title: Functions
+  contents:
+  - beta_correction_for_cohorts()
+  - reference_regression_generator()
+  - PurEst()
+  - reference_based_beta_correction()
+
+- title: Example datasets
+  contents:
+  - example_betas_to_correct
+  - example_betas_reference
+  - example_purities_reference

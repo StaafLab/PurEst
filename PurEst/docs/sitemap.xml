@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>/404.html</loc>
+  </url>
+  <url>
+    <loc>/authors.html</loc>
+  </url>
+  <url>
+    <loc>/index.html</loc>
+  </url>
+  <url>
+    <loc>/reference/PurEst.html</loc>
+  </url>
+  <url>
+    <loc>/reference/beta_correction_for_cohorts.html</loc>
+  </url>
+  <url>
+    <loc>/reference/example_betas_reference.html</loc>
+  </url>
+  <url>
+    <loc>/reference/example_betas_to_correct.html</loc>
+  </url>
+  <url>
+    <loc>/reference/example_purities_reference.html</loc>
+  </url>
+  <url>
+    <loc>/reference/index.html</loc>
+  </url>
+  <url>
+    <loc>/reference/reference_based_beta_correction.html</loc>
+  </url>
+  <url>
+    <loc>/reference/reference_regression_generator.html</loc>
+  </url>
+</urlset>

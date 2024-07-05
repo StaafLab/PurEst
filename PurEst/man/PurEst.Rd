@@ -2,7 +2,7 @@
 % Please edit documentation in R/PurEst.R
 \name{PurEst}
 \alias{PurEst}
-\title{PurEsr}
+\title{PurEst}
 \usage{
 PurEst(
   reference_regressions,
