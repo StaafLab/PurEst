@@ -1,4 +1,5 @@
-# PurEst
+<font size="12">**PurEst** </font>  <a href="https://staaflab.github.io/PurEst/"><img src="man/figures/logo.svg" align="right" height="278" alt="PurEst website" /></a>
+
 Method for calculating tumor purity and adjusting Illumina 450/850K DNA methylation beta values. This work has been described in the article "**Tumor purity estimated from bulk DNA methylation can be used for adjusting beta values of individual samples to better reflect tumor biology**" published by [Sasiain, Nacer et al. in *JOURNAL*](LINK).
 
 ## How to install
