@@ -1,0 +1,5 @@
+## code to prepare `example_data` dataset goes here
+
+usethis::use_data(example_betas_reference, overwrite = TRUE)
+usethis::use_data(example_purities_reference, overwrite = TRUE)
+usethis::use_data(example_betas_to_correct, overwrite = TRUE)
