@@ -23,8 +23,9 @@ The PurEst package is divided into four main functions:
 1. *Correction of beta values from a cohort with known sample purities*: The function ***beta_correction_for_cohorts()*** performs beta value adjustment based on tumour sample compusition based on the original Staaf & Aine beta correction approch, correcting betas from a cohort of samples with known sample purities. More information about this approach can be found in the original publication: [Staaf & Aine, PLosOne, 2022](https://doi.org/10.1371/journal.pone.0265557).
 
 2. *Creation of reference data from a cohort*: in the ***reference_regressions_generator()*** function, reference linear regressions are calculated based on DNA methylation beta values and tumor purity estimates of a cohort. Each regression represents a sample population as shown in the figure below. Scripts used in this module: ref_regression_calculator.r (main), new_function_correctBetas.r.
-
-<img src="./man/figures/module1.png" width="350" class="center">
+<div align="center">
+  <img src="./man/figures/module1.png" width="350" class="center">
+</div>
 </p>
 
 3. *Estimation of tumor purities for individual samples*: in thE ***PurEst()*** function, CpGs are filtered based on beta variance and then each CpG is processed individually per sample as shown in the figure below. Scripts used in this module: purity_estimator.r (main), predicting_purity.r, purity_coverage.r.
