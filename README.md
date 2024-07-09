@@ -14,6 +14,7 @@ library(devtools)
 
 # Install and load PurEst
 install_github("StaafLab/PurEst/PurEst")
+library(PurEst)
 ```
 
 ## Framework
@@ -23,8 +24,7 @@ The PurEst package is divided into four main functions:
 
 2. *Creation of reference data from a cohort*: in the ***reference_regressions_generator()*** function, reference linear regressions are calculated based on DNA methylation beta values and tumor purity estimates of a cohort. Each regression represents a sample population as shown in the figure below. Scripts used in this module: ref_regression_calculator.r (main), new_function_correctBetas.r.
 
-<img src="./man/figures/module1.png" width="350">
-</p>
+![](./man/figures/module1.png)
 
 3. *Estimation of tumor purities for individual samples*: in thE ***PurEst()*** function, CpGs are filtered based on beta variance and then each CpG is processed individually per sample as shown in the figure below. Scripts used in this module: purity_estimator.r (main), predicting_purity.r, purity_coverage.r.
 
