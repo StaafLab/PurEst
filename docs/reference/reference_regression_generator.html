@@ -64,8 +64,7 @@ This function allows multi-core parallel execution.</p>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>beta_values</dt>
-<dd><p>A matrix with CpGs as rows and analysed samples (or an
-individual sample) as columns with the uncorrected beta values from the CpGs
+<dd><p>A matrix with CpGs as rows and analysed samples as columns with the uncorrected beta values from the CpGs
 of the samples that are intended to be used to build the reference regressions.
 The values must be numeric, the rows must be names with the CpG ID, and the
 columns with the sample IDs. An example of the required format is available
@@ -73,7 +72,7 @@ in the example_betas_reference matrix.</p></dd>
 
 
 <dt>tumour_purities</dt>
-<dd><p>Named vector containing the sample purity values of
+<dd><p>Named vector containing the sample purity values
 of the samples whose DNA methylation beta values are intended to be used to
 build the reference regressions. The vector must be named with the sample ID,
 which must match with the sample IDs from the matrix containing the beta
