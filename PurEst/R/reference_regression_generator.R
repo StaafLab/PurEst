@@ -2,17 +2,17 @@
 #'
 #' This function generates the reference regressions' parameters and variance of
 #' the used reference CpGs required to be used in subsequent steps of the PurEst
-#' workflow based on the Staaf & Aine methylation beta value correction startegy.
-#' This function allows multi-core parallel execution.
+#' workflow based on the Staaf & Aine methylation beta value correction strategy.
+#' This function allows multi-core execution.
 #'
-#' @param beta_values A matrix with CpGs as rows and analysed samples (or an
-#' individual sample) as columns with the uncorrected beta values from the CpGs
-#' of the samples that are intended to be used to build the reference regressions.
-#' The values must be numeric, the rows must be names with the CpG ID, and the
-#' columns with the sample IDs. An example of the required format is available
-#' in the example_betas_reference matrix.
+#' @param beta_values A matrix with CpGs as rows and analysed samples  as columns
+#' with the uncorrected beta values from the CpGs of the samples that are
+#' intended to be used to build the reference regressions. The values must be
+#' numeric, the rows must be names with the CpG ID, and the columns with the
+#' sample IDs. An example of the required format is available in the
+#' example_betas_reference matrix.
 #'
-#' @param tumour_purities Named vector containing the sample purity values of
+#' @param tumour_purities Named vector containing the purity values of
 #' of the samples whose DNA methylation beta values are intended to be used to
 #' build the reference regressions. The vector must be named with the sample ID,
 #' which must match with the sample IDs from the matrix containing the beta
@@ -74,6 +74,19 @@ reference_regression_generator <- function(
 
 ) {
 
+  # ==============
+  # ERROR HANDLING
+  # ==============
+
+  # Checking if the the samples of betas and purities match
+
+  if (
+    !identical(sort(colnames(beta_values)), sort(names(tumour_purities)))
+  ) {
+    stop("The samples of the beta matrix and purity vector do not match. Review the input data.")
+  }
+
+
   # ===========================
   # CONFIGURING PARALLELIZATION
   # ===========================
@@ -87,6 +100,9 @@ reference_regression_generator <- function(
   #Making sure that all packages have access to the flexmix package. Using invisible()
   #to avoid printing anything to the terminal.
   invisible(clusterEvalQ(cl, {library("flexmix")}))
+
+  # Ensuring the cluster is stopped properly
+  on.exit(stopCluster(cl), add = TRUE)
 
 
   # ================================
@@ -123,16 +139,16 @@ reference_regression_generator <- function(
   pbo <- pboptions(type = "txt", char="=", txt.width=80)
 
   #Running the analysis in parallel with a progress bar
-  res <- pbapply(cl = cl, #ClusterS to run the process
+  #Using supress warnings to avoid the function to raise a warning when an
+  #identified methylation population generates a regerssion with perfect fit.
+  #This does not happen due to errors
+  res <- suppressWarnings(pbapply(cl = cl, #ClusterS to run the process
                  MARGIN = 1, #Apply the function to the rows
                  FUN = adjustBeta, #Function to correct betas
                  purity=tumour_purities, #Purity values
                  snames=betaNames, #Sample names
                  seed=set_seed, #Specify if the seed has been added to the data or not
-                 betaRun) #Beta values+the added seed
-
-  # Stop clusters used in parallelization
-  stopCluster(cl)
+                 betaRun)) #Beta values+the added seed
 
 
   # =================

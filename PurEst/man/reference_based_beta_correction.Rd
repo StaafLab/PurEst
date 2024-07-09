@@ -22,7 +22,7 @@ reference_based_beta_correction(
 \item{betas_to_correct}{A matrix with CpGs as rows and analysed samples (or an
 individual sample) as columns with the uncorrected beta values from the CpGs
 of the samples that are intended to be corrected. The values must be numeric,
-the rows must be names with the CpG ID, and the columns with the sample IDs.
+the rows must be named with the CpG ID, and the columns with the sample IDs.
 An example of the required format is available in the example_betas_to_correct
 matrix.}
 
@@ -30,7 +30,7 @@ matrix.}
 purity estimation function in the original format should be entered here.}
 
 \item{only_certain_CpGs}{Default = FALSE. If the beta correction has to be
-applied only to certain CpGs and to to all the ones included in the matrix
+applied only to certain CpGs and not to all the ones included in the matrix
 provided as the betas_to_correct argument this argument should be set to
 TRUE.}
 
@@ -39,13 +39,13 @@ user wants to refit the reference regression to also take into account the
 betas and PurEst estimated sample purity values as additional data points.
 This could be advisable when having a non-fully representative reference
 dataset and a significant number of samples whose purity has been estimated
-using PurEst.Else, the reference regressions will be directly used for the
+using PurEst. Else, the reference regressions will be directly used for the
 beta correction.}
 
 \item{reference_regressions}{The output of the reference regression generator
 should be entered here if the refitting argument has NOT been set to TRUE.
 Else, this argument should be ignored. This argument accepts both, the normal
-and extended versions of the reference_regression_generator function.}
+and extended versions of the reference_regression_generator function's output.}
 
 \item{reference_betas}{A matrix with CpGs as rows and analysed samples (or an
 individual sample) as columns with the uncorrected beta values from the CpGs
@@ -77,7 +77,7 @@ parallel.}
 only_certain_CpGs = TRUE has been specified.}
 }
 \value{
-List with the corrected betas for the tumour (output$`Corrected_betas`)
+List with the corrected betas for the tumour (output$`Corrected_tumor`)
 and microenvironment (output$`Corrected_microenvironment`) when refitting =
 FALSE. If refitting = TRUE has been selected the corrected betas for the
 tumour and microenvironment (output$`Corrected_betas`) will be available in
@@ -89,8 +89,8 @@ This script corrects beta values of samples whose purity has been estimated
  based on a reference cohort following two approaches, refitting the reference
  regressions to include both, the reference data points and the new ones
  (betas to correct + estimated purity) or without refitting the reference
- regressions, using directly the original reference regressions for the
- correction. This function allows multi-core parallel execution.
+ regressions, using directly the original reference linear models for the
+ correction. This function allows multi-core execution.
 }
 \examples{
 

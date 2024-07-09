@@ -2,9 +2,9 @@
 #'
 #' The PurEst() function estimates tumour sample purity based on DNA methylation
 #' beta values and reference linear models that reflect the correlation between
-#' tumour purity and detected beta values of the different methylation
-#' patterns detected in each analysed CpG.This function can be applied to both
-#' single and multiple samples in each run and allows multi-core execution.
+#' tumour purity and beta values in each analysed CpG.This function can be
+#' applied to both single and multiple samples in each run and allows multi-core
+#' execution.
 #'
 #' @param reference_regressions List objects containing the parameters of the
 #' reference regressions determined using the reference_regression_generator()

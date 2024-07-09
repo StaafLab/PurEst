@@ -14,14 +14,14 @@ reference_regression_generator(
 )
 }
 \arguments{
-\item{beta_values}{A matrix with CpGs as rows and analysed samples (or an
-individual sample) as columns with the uncorrected beta values from the CpGs
-of the samples that are intended to be used to build the reference regressions.
-The values must be numeric, the rows must be names with the CpG ID, and the
-columns with the sample IDs. An example of the required format is available
-in the example_betas_reference matrix.}
+\item{beta_values}{A matrix with CpGs as rows and analysed samples  as columns
+with the uncorrected beta values from the CpGs of the samples that are
+intended to be used to build the reference regressions. The values must be
+numeric, the rows must be names with the CpG ID, and the columns with the
+sample IDs. An example of the required format is available in the
+example_betas_reference matrix.}
 
-\item{tumour_purities}{Named vector containing the sample purity values of
+\item{tumour_purities}{Named vector containing the purity values of
 of the samples whose DNA methylation beta values are intended to be used to
 build the reference regressions. The vector must be named with the sample ID,
 which must match with the sample IDs from the matrix containing the beta
@@ -60,8 +60,8 @@ the reference regressions per CpG (output$cpg.populations).
 \description{
 This function generates the reference regressions' parameters and variance of
 the used reference CpGs required to be used in subsequent steps of the PurEst
-workflow based on the Staaf & Aine methylation beta value correction startegy.
-This function allows multi-core parallel execution.
+workflow based on the Staaf & Aine methylation beta value correction strategy.
+This function allows multi-core execution.
 }
 \examples{
 

@@ -4,13 +4,13 @@
 #'  based on a reference cohort following two approaches, refitting the reference
 #'  regressions to include both, the reference data points and the new ones
 #'  (betas to correct + estimated purity) or without refitting the reference
-#'  regressions, using directly the original reference regressions for the
-#'  correction. This function allows multi-core parallel execution.
+#'  regressions, using directly the original reference linear models for the
+#'  correction. This function allows multi-core execution.
 #'
 #' @param betas_to_correct A matrix with CpGs as rows and analysed samples (or an
 #' individual sample) as columns with the uncorrected beta values from the CpGs
 #' of the samples that are intended to be corrected. The values must be numeric,
-#' the rows must be names with the CpG ID, and the columns with the sample IDs.
+#' the rows must be named with the CpG ID, and the columns with the sample IDs.
 #' An example of the required format is available in the example_betas_to_correct
 #' matrix.
 #'
@@ -18,7 +18,7 @@
 #' purity estimation function in the original format should be entered here.
 #'
 #' @param only_certain_CpGs Default = FALSE. If the beta correction has to be
-#' applied only to certain CpGs and to to all the ones included in the matrix
+#' applied only to certain CpGs and not to all the ones included in the matrix
 #' provided as the betas_to_correct argument this argument should be set to
 #' TRUE.
 #'
@@ -30,13 +30,13 @@
 #' betas and PurEst estimated sample purity values as additional data points.
 #' This could be advisable when having a non-fully representative reference
 #' dataset and a significant number of samples whose purity has been estimated
-#' using PurEst.Else, the reference regressions will be directly used for the
+#' using PurEst. Else, the reference regressions will be directly used for the
 #' beta correction.
 #'
 #' @param reference_regressions The output of the reference regression generator
 #' should be entered here if the refitting argument has NOT been set to TRUE.
 #' Else, this argument should be ignored. This argument accepts both, the normal
-#' and extended versions of the reference_regression_generator function.
+#' and extended versions of the reference_regression_generator function's output.
 #'
 #' @param reference_betas A matrix with CpGs as rows and analysed samples (or an
 #' individual sample) as columns with the uncorrected beta values from the CpGs
@@ -64,7 +64,7 @@
 #' @param cores Default = 1. Number of cores to be used to run the function in
 #' parallel.
 #'
-#' @returns List with the corrected betas for the tumour (output$`Corrected_betas`)
+#' @returns List with the corrected betas for the tumour (output$`Corrected_tumor`)
 #' and microenvironment (output$`Corrected_microenvironment`) when refitting =
 #' FALSE. If refitting = TRUE has been selected the corrected betas for the
 #' tumour and microenvironment (output$`Corrected_betas`) will be available in
@@ -137,10 +137,12 @@ reference_based_beta_correction <- function(
 
   if (refitting == TRUE) {
 
-    #Making sure that all cores have access to the flexmix package. Using invisible()
-    #to avoid printing anything to the terminal
+    #Making sure that all cores have access to the flexmix package and the
+    #adjustBeta function. Using invisible() to avoid printing anything to the
+    #terminal
     registerDoParallel(cl)
     invisible(clusterEvalQ(cl, {library("flexmix")}))
+    parallel::clusterExport("adjustBeta")
 
     # PROCESSING PREDICTED PURITIES
 
@@ -232,14 +234,17 @@ reference_based_beta_correction <- function(
     pbo <- pboptions(type = "txt", char="=", txt.width=80)
 
     #Running the analysis in parallel with a progress bar
-    res <- pbapply(cl = cl, #ClusterS to run the process
+    #Using supress warnings to avoid the function to raise a warning when an
+    #identified methylation population generates a regerssion with perfect fit.
+    #This does not happen due to errors
+    res <- suppressWarnings(pbapply(cl = cl, #ClusterS to run the process
                    MARGIN = 1, #Apply the function to the rows
                    FUN = adjustBeta, #Function to correct betas
                    purity=purities, #Purity values
                    snames=betaNames, #Sample names
                    seed=use_seed, #Specify if the seed has been added to the data or not
                    betaRun #Beta values+the added seed
-    )
+    ))
 
     # Stop clusters used in parallelization
     stopCluster(cl)

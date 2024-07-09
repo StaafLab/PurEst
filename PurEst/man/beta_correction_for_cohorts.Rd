@@ -13,12 +13,11 @@ beta_correction_for_cohorts(
 )
 }
 \arguments{
-\item{beta_values}{A matrix with CpGs as rows and analysed samples (or an
-individual sample) as columns with the uncorrected beta values from the CpGs
-of the samples that are intended to be corrected. The values must be numeric,
-the rows must be names with the CpG ID, and the columns with the sample IDs.
-An example of the required format is available in the
-example_betas_reference matrix.}
+\item{beta_values}{A matrix with CpGs as rows and tumour samples as columns
+with the uncorrected beta values from the CpGs of the samples that are
+intended to be corrected. The values must be numeric, the rows must be named
+with the CpG ID, and the columns with the sample IDs. An example of the
+required format is available in the example_betas_reference matrix.}
 
 \item{tumour_purities}{Named vector containing the sample purity values of
 of the samples whose DNA methylation beta values are intended to be corrected.
@@ -45,7 +44,7 @@ and the corrected microenvironment beta values (output$betas.microenvironment).
 This functions applies the original Staaf & Aine DNA methylation beta value
 correction strategy to adjust the effect of sample purities in cohorts with
 known sample purities and CpG beta values (Staaf & Aine, Plos One, 2022).
-This function allows mult-core parallelization.
+This function allows mult-core execution.
 }
 \examples{
 
